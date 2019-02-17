@@ -9,7 +9,7 @@ let width = ( canvas.width - margin * 5 )/4;
 
 let boxArray = [
 	[0,0,0,0],
-	[0,0,0,0],
+	[0,64,0,0],
 	[0,0,0,0],
 	[0,0,0,0]
 ];
@@ -44,6 +44,8 @@ let startNum = function () {
 
 startNum();
 
+
+let onceRander = true;
 // 渲染函数
 let render = function(){
 	if(isGameOver()) {
@@ -52,17 +54,23 @@ let render = function(){
 		for(let i = 0;i<4;i++){
 			for(let j =0;j<4;j++){
 				c.beginPath();
-	
 				let x = margin * (i + 1) + width * i;
 				let y = margin * (j + 1) + width * j;
-				let fw = c.measureText(boxArray[i][j]).width;
+				let fw = Math.floor(c.measureText(boxArray[j][i]).width);
 				let fh = 23;
 				c.font = "30px Arial";
-				
+				// console.log(fw);
+				// if(onceRander){
+				// 	c.fillStyle = "#dea28c";
+				// 	c.fillRect(x,y,width,width);
+				// 	onceRander = !onceRander;
+				// }
+				// console.log(fw);
 				c.fillStyle = "#dea28c";
 				c.fillRect(x,y,width,width);
 				
 				if(boxArray[j][i] != 0) {
+
 					if(boxArray[j][i] === 2){
 						c.fillStyle = "#58D68D";
 						c.fillRect(x,y,width,width);
@@ -99,9 +107,12 @@ let render = function(){
 					}
 
 					c.fillStyle = "#fff";
-					
+					// console.log(x+(width-fw)/2,y+(width-fh)/2 + fh);
+					// console.log(fw,fh);
+
+					// console.log(x,fw,x+(width-fw)/2);
 					c.fillText(boxArray[j][i],x+(width-fw)/2,y+(width-fh)/2+ fh);
-					
+					//x+(width-fw)/2 y+(width-fh)/2+ fh
 				}
 				
 				c.closePath();
@@ -141,7 +152,6 @@ let touchStart_vert = 0;
 let touchEnd_hori = 0;
 let touchEnd_vert = 0;
 
-
 function start (evt) {
 	// console.log(evt.targetTouches[0]);
 	touchStart_hori = evt.targetTouches[0].pageX;
@@ -175,7 +185,7 @@ function calcuDirector () {
 	}
 }
 
-// pc端
+// pc端 
 
 document.addEventListener("keydown",directions,false);
 function directions (e) {
@@ -194,15 +204,7 @@ function directions (e) {
 // 滑动方向的四个函数
 
 let toRight = function () {
-
-	let isChange = [[],[],[],[]];
-	for(let i = 0;i<boxArray.length;i++){
-		for(let j = 0;j<boxArray.length;j++) {
-			isChange[i][j] = boxArray[i][j]
-		}
-	}
-
-
+	let isChange = isChanges();
 	for(let i = 0; i < boxArray.length; i++) {
 		merage(boxArray[i])
 	}
@@ -216,59 +218,31 @@ let toRight = function () {
 			// console.log(i);
 		}
 	}
-
-	
 	if(isMove(isChange)){
 		newNumber();
+		clearCanvas(isChange);
 		render();
 	}else{
 		alert("Can Not Move");
 	}
-	console.log("RIGHT");
 }
 let toLeft = function () {
-	console.log("LEFT");
-	
-	let isChange = [[],[],[],[]];
-	for(let i = 0;i<boxArray.length;i++){
-		for(let j = 0;j<boxArray.length;j++) {
-			isChange[i][j] = boxArray[i][j]
-		}
-	}
-
-
-
-
+	let isChange = isChanges();
 	for(let i = 0;i<boxArray.length;i++) {
 		merage(boxArray[i]);
 	}
 	if(isMove(isChange)){
 		newNumber();
+		clearCanvas(isChange);
+
 		render();
 	}else{
 		alert("Can Not Move");
 	}
 }
 let toDown = function () {
-
-	let isChange = [[],[],[],[]];
-	for(let i = 0;i<boxArray.length;i++){
-		for(let j = 0;j<boxArray.length;j++) {
-			isChange[i][j] = boxArray[i][j]
-		}
-	}
-
-	console.log(isChange);
-	let cpBox = [];
-	let tempArr = [];
-	for(let i = 0;i<boxArray.length;i++) {		
-		for(let j = 0;j<boxArray.length;j++) {
-			tempArr.push(boxArray[boxArray.length-1-j][i])
-		}
-		merage(tempArr);
-		cpBox.push(tempArr);
-		tempArr = [];
-	}
+	let isChange = isChanges();
+	let cpBox = upDownMerage('down');
 	for(let i = 0;i<boxArray.length;i++) {
 		for(let j = 0;j<boxArray.length;j++) {
 			boxArray[j][i] = cpBox[i][cpBox.length-1-j];
@@ -276,6 +250,8 @@ let toDown = function () {
 	}
 	if(isMove(isChange)){
 		newNumber();
+		clearCanvas(isChange);
+
 		render();
 	}else{
 		alert("Can Not Move");
@@ -283,34 +259,17 @@ let toDown = function () {
 
 }
 let toUp = function () {
-
-
-	let isChange = [[],[],[],[]];
-	for(let i = 0;i<boxArray.length;i++){
-		for(let j = 0;j<boxArray.length;j++) {
-			isChange[i][j] = boxArray[i][j]
-		}
-	}
-
-	let tempArr = [];
-	let cpBox = [];
-	for(let i = 0;i<boxArray.length;i++) {
-		for(let j = 0;j<boxArray.length;j++) {
-			tempArr.push(boxArray[j][i])
-		}
-		merage(tempArr);
-		cpBox.push(tempArr);
-		tempArr = [];
-	}
+	let isChange = isChanges();
+	let cpBox = upDownMerage('up');
 	for(let m = 0;m<boxArray.length;m++) {
 		for(let n = 0;n<boxArray.length;n++)
 			boxArray[n][m] = cpBox[m][n];
 	}
-
-
 	// 判断是否可以生成新的随机数
 	if(isMove(isChange)){
 		newNumber();
+		clearCanvas(isChange);
+
 		render();
 	}else{
 		alert("Can Not Move");
@@ -431,7 +390,6 @@ function isGameOver () {
 			if(boxArray[i][j] !== 0) count++;
 		}
 	}
-
 	// console.log(count)
 	for(let i = 0;i<boxArray.length;i++){
 		for(let j = 0;j<boxArray.length;j++) {
@@ -456,7 +414,7 @@ function saveGame () {
 	localStorage.setItem("2048",str);
 }
 
-// 充值按钮
+// 重置按钮
 rest.onclick = function () {
 	// alert("already rest");
 	localStorage.removeItem("2048");
@@ -470,6 +428,47 @@ rest.onclick = function () {
 	]
 	
 	startNum();
+	clearCanvas();
 	render();
 }
 
+
+
+function upDownMerage (operator) {
+	let len = 0;
+	if(operator === "down"){
+		len = boxArray.length-1;
+	}else if(operator === "up"){
+		len = 0;
+	}else {
+		return "error";
+	}
+	let cpBox = [];
+	let tempArr = [];
+	for(let i = 0;i<boxArray.length;i++) {		
+		for(let j = 0;j<boxArray.length;j++) {
+			tempArr.push(boxArray[Math.abs(len-j)][i])
+		}
+		merage(tempArr);
+		cpBox.push(tempArr);
+		tempArr = [];
+	}
+	return cpBox;
+}
+
+
+function isChanges () {
+	let isChange = [[],[],[],[]];
+	for(let i = 0;i<boxArray.length;i++){
+		for(let j = 0;j<boxArray.length;j++) {
+			isChange[i][j] = boxArray[i][j]
+		}
+	}
+	return isChange;
+}
+
+function clearCanvas (boxArray) {
+	c.beginPath();
+	c.clearRect(0,0,canvas.width,canvas.width)
+	c.closePath();
+}
