@@ -1,0 +1,15 @@
+{
+    "name": "2048 game for PWA",
+    "short_name": "2048",
+    "display": "standalone",
+    "start_url": "/",
+    "theme_color": "#8888ff",
+    "background_color": "#aaaaff",
+    "icons": [
+      {
+        "src": "./img/App.png",
+        "sizes": "256x256",
+        "type": "image/png"
+      }
+    ]
+  }
